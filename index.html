@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Play Rota, the ancient Roman wheel game. Master circular spatial reasoning, cyclic group theory (C8), and sliding tactics against Roman AI or a friend.">
+  <title>Rota - Ancient Roman Wheel Game</title>
+  
+  <!-- Google Fonts: Cinzel for Roman monumental serif and Outfit for crisp UI -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="ambient-glow glow-top" aria-hidden="true"></div>
+  <div class="ambient-glow glow-bottom" aria-hidden="true"></div>
+
+  <div class="app-wrapper">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="spqr-badge">SPQR</div>
+        <div>
+          <h1 class="game-title">ROTA</h1>
+          <p class="game-subtitle">LUDUS ROTAE • ANCIENT ROMAN WHEEL GAME</p>
+        </div>
+      </div>
+
+      <!-- Quick Action Controls -->
+      <div class="header-controls">
+        <button id="btn-open-levels" class="btn-ctrl" title="View Campaigns and Difficulty Levels">
+          <span class="icon">🏛️</span> Levels
+        </button>
+        <button id="btn-open-math" class="btn-ctrl" title="Circular Spatial Reasoning & Cyclic Math">
+          <span class="icon">📐</span> Brain Boost
+        </button>
+        <button id="btn-open-rules" class="btn-ctrl" title="How to Play Rota">
+          <span class="icon">📜</span> Rules
+        </button>
+        <button id="btn-toggle-sound" class="btn-ctrl" title="Toggle Sound FX">
+          🔊 Sound
+        </button>
+        <button id="btn-restart-game" class="btn-ctrl btn-restart" title="Restart Current Match">
+          <span class="icon">🔄</span> Restart
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Navigation: Mode Selector Tabs -->
+    <nav class="mode-navigation" aria-label="Game Mode Selection">
+      <div class="mode-tabs-container">
+        <button class="mode-tab-btn active" data-mode="ai" id="tab-vs-computer">
+          <span class="tab-icon">⚔️</span>
+          <span class="tab-label">Play vs Roman AI</span>
+          <span class="tab-badge">5 Levels</span>
+        </button>
+        <button class="mode-tab-btn" data-mode="friend" id="tab-vs-friend">
+          <span class="tab-icon">👥</span>
+          <span class="tab-label">Play with Friend</span>
+          <span class="tab-badge">5 Arenas</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Campaign Banner & Game Status -->
+    <section class="campaign-status-banner">
+      <div class="campaign-meta">
+        <span class="laurel-leaf">🌿</span>
+        <div>
+          <h2 id="campaign-level-title" class="current-tier-heading">Level I: Tiro (The Recruit)</h2>
+          <p id="campaign-level-subtitle" class="current-tier-sub">The Campus Martius • Training Grounds</p>
+        </div>
+      </div>
+      <div class="streak-tracker">
+        <span class="streak-label">VICTORY STREAK</span>
+        <span id="streak-count" class="streak-value">0</span>
+      </div>
+    </section>
+
+    <!-- Phase & Timer Bar -->
+    <div class="game-phase-bar">
+      <div id="game-phase-badge" class="phase-badge phase-drop">
+        Phase I: Placement (6 pieces left)
+      </div>
+
+      <!-- Turn Blitz Timer -->
+      <div id="timer-display" class="timer-display hidden">
+        <span class="timer-icon">⏳</span>
+        <div class="timer-progress-track">
+          <div id="timer-progress-fill" class="timer-progress-fill"></div>
+        </div>
+        <span id="timer-seconds" class="timer-seconds">15s</span>
+      </div>
+    </div>
+
+    <!-- Main Arena: Players + Board -->
+    <main class="arena-grid">
+      <!-- Player 1 Card (Carnelian Crimson) -->
+      <section id="player1-card" class="player-card card-p1 active-turn" aria-label="Player 1 Status">
+        <div class="player-header">
+          <div class="player-avatar avatar-p1">🦅</div>
+          <div class="player-info">
+            <h3 id="p1-name-display" class="player-name">Gladiator (You)</h3>
+            <span class="stone-color-tag">Carnelian Red</span>
+          </div>
+        </div>
+        <div class="player-reserve-wrap">
+          <span class="reserve-label">Reserve Stones:</span>
+          <div id="p1-stones-reserve" class="stones-reserve" aria-label="Player 1 Reserve Stones">
+            <!-- Stones generated dynamically -->
+          </div>
+        </div>
+        <div class="player-score-footer">
+          <span id="p1-score-badge" class="score-badge">Wins: 0</span>
+        </div>
+      </section>
+
+      <!-- Center Board Wrapper -->
+      <section class="board-wrapper">
+        <div id="board-container" class="board-container">
+          <!-- SVG Board injected here -->
+        </div>
+
+        <div class="board-action-bar">
+          <button id="btn-toggle-math-overlay" class="btn-math-toggle" title="Toggle C8 Cyclic Math Overlay">
+            <span>📐</span> Cyclic C₈ Math Overlay
+          </button>
+        </div>
+      </section>
+
+      <!-- Player 2 / AI Card (Carrara Marble) -->
+      <section id="player2-card" class="player-card card-p2" aria-label="Player 2 Status">
+        <div class="player-header">
+          <div class="player-avatar avatar-p2">🌿</div>
+          <div class="player-info">
+            <h3 id="p2-name-display" class="player-name">Roman AI</h3>
+            <span class="stone-color-tag">Carrara Marble</span>
+          </div>
+        </div>
+        <div class="player-reserve-wrap">
+          <span class="reserve-label">Reserve Stones:</span>
+          <div id="p2-stones-reserve" class="stones-reserve" aria-label="Player 2 Reserve Stones">
+            <!-- Stones generated dynamically -->
+          </div>
+        </div>
+        <div class="player-score-footer">
+          <span id="p2-score-badge" class="score-badge">Losses: 0</span>
+        </div>
+      </section>
+    </main>
+
+    <!-- Turn Message Ticker -->
+    <footer class="status-ticker">
+      <div id="turn-status-text" class="status-message">
+        Your Turn: Place a stone on any vacant socket.
+      </div>
+    </footer>
+  </div>
+
+  <!-- MODAL 1: Game Result (Victory / Defeat / Draw) -->
+  <dialog id="dialog-result" class="roman-modal">
+    <div class="modal-card">
+      <div class="result-wreath-wrap">
+        <div id="result-icon" class="result-icon">👑</div>
+      </div>
+      <h3 id="result-title" class="modal-title">VICTORIA!</h3>
+      <p id="result-subtitle" class="modal-subtitle">3-in-a-row along the sacred wheel!</p>
+      <div class="modal-divider"></div>
+      <p id="result-detail" class="modal-body-text">
+        The crowd roars in triumph! Your circular spatial mastery has conquered Rome.
+      </p>
+      <div class="modal-btn-row">
+        <button id="btn-result-rematch" class="btn-modal btn-secondary">
+          <span>🔄</span> Play Again
+        </button>
+        <button id="btn-result-next" class="btn-modal btn-primary">
+          <span>🏛️</span> Next Level ➔
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- MODAL 2: Levels & Campaign Drawer -->
+  <dialog id="dialog-levels" class="roman-modal modal-wide">
+    <div class="modal-card">
+      <div class="modal-header-row">
+        <div>
+          <h3 class="modal-title">CAMPAIGNS & ARENAS</h3>
+          <p class="modal-subtitle">5 Escalating Tiers of Tactical Mastery</p>
+        </div>
+        <button id="btn-close-levels" class="btn-close-modal" aria-label="Close dialog">✕</button>
+      </div>
+      <div class="modal-divider"></div>
+      <div id="levels-list-container" class="levels-grid">
+        <!-- Level cards rendered dynamically -->
+      </div>
+    </div>
+  </dialog>
+
+  <!-- MODAL 3: Brain Boost & Cyclic Math Explained -->
+  <dialog id="dialog-math" class="roman-modal modal-wide">
+    <div class="modal-card">
+      <div class="modal-header-row">
+        <div>
+          <h3 class="modal-title">THE MATHEMATICS OF ROTA</h3>
+          <p class="modal-subtitle">Cyclic Group Theory (C₈), Topology & Circular Spatial Reasoning</p>
+        </div>
+        <button id="btn-close-math" class="btn-close-modal" aria-label="Close dialog">✕</button>
+      </div>
+      <div class="modal-divider"></div>
+      
+      <div class="math-content">
+        <div class="math-card">
+          <h4>1. The Cyclic Group C₈ & Rotational Invariance</h4>
+          <p>
+            Unlike square grid games like Tic-Tac-Toe where corners and edges have different geometric properties, 
+            every rim node in Rota belongs to the <strong>Cyclic Group C₈</strong>. A rotation by 45° ($g$) generates the entire group:
+          </p>
+          <div class="math-formula">
+            $$C_8 = \{ e, g, g^2, g^3, g^4, g^5, g^6, g^7 \}$$
+          </div>
+          <p>
+            Every position on the rim is structurally identical. Winning along the rim is governed by modular arithmetic: 
+            three stones at indices $(i, j, k)$ form a winning rim triplet if and only if:
+            <br>
+            <strong>$j \equiv (i + 1) \pmod 8$ and $k \equiv (i + 2) \pmod 8$</strong>.
+          </p>
+        </div>
+
+        <div class="math-card">
+          <h4>2. The Diameter Antipodes (Spoke Lines)</h4>
+          <p>
+            Any line passing through the center connects two antipodal rim points separated by half the cycle ($180^\circ$):
+          </p>
+          <div class="math-formula">
+            $$\text{Antipode}(i) = (i + 4) \pmod 8$$
+          </div>
+          <p>
+            Together with the center hub ($C$), this forms the 4 diameter winning triplets: 
+            $(0, C, 4), (1, C, 5), (2, C, 6), (3, C, 7)$.
+          </p>
+        </div>
+
+        <div class="math-card">
+          <h4>3. Circular Spatial Reasoning vs Grid Thinking</h4>
+          <p>
+            Traditional board games train Cartesian (X, Y) thinking. Rota trains <strong>polar coordinates $(r, \theta)$</strong>. 
+            Because the ends of the rim wrap around seamlessly ($7 \to 0$), players must train their brains to detect 
+            wrap-around threats like $(6, 7, 0)$ and $(7, 0, 1)$, preventing linear cognitive blind spots.
+          </p>
+        </div>
+
+        <div class="math-card">
+          <h4>4. Sliding Topology & Deep Game Tree</h4>
+          <p>
+            With only 3 pieces per player and 9 sockets, there are 3 unoccupied sockets during the sliding phase. 
+            This graph ($C_8 + K_1$) creates non-trivial cycle transitions, making the movement phase dynamic and deep.
+          </p>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- MODAL 4: Rules of Rome -->
+  <dialog id="dialog-rules" class="roman-modal">
+    <div class="modal-card">
+      <div class="modal-header-row">
+        <div>
+          <h3 class="modal-title">RULES OF ROTA</h3>
+          <p class="modal-subtitle">Ancient Roman Wheel Game (Terni Lapilli)</p>
+        </div>
+        <button id="btn-close-rules" class="btn-close-modal" aria-label="Close dialog">✕</button>
+      </div>
+      <div class="modal-divider"></div>
+      
+      <div class="rules-content">
+        <div class="rule-step">
+          <span class="rule-num">I</span>
+          <div>
+            <h4>Drop Phase (Placing Pieces)</h4>
+            <p>Each player begins with 3 stones. Players alternate placing one stone at a time onto any empty socket on the wheel.</p>
+          </div>
+        </div>
+
+        <div class="rule-step">
+          <span class="rule-num">II</span>
+          <div>
+            <h4>Slide Phase (Movement)</h4>
+            <p>Once all 6 stones are placed, players alternate selecting one of their stones and sliding it along a marked line (either around the rim or through a spoke) to an adjacent vacant socket. No jumping allowed.</p>
+          </div>
+        </div>
+
+        <div class="rule-step">
+          <span class="rule-num">III</span>
+          <div>
+            <h4>Winning the Match</h4>
+            <p>The first player to form <strong>3-in-a-row</strong> wins! This can be either:
+              <br>• Along any 3 adjacent sockets on the circular rim.
+              <br>• Through the center along any of the 4 straight spoke diameters.
+            </p>
+          </div>
+        </div>
+
+        <div class="rule-step">
+          <span class="rule-num">IV</span>
+          <div>
+            <h4>Traps & Repetition</h4>
+            <p>If a player is completely blocked with no legal moves on their turn, their opponent wins. If the exact board state repeats 3 times, the match is declared a draw (Pax Romana).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Script files -->
+  <script src="js/audio.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/levels.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
